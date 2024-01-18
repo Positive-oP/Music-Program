@@ -11,7 +11,7 @@ float columnGap = 150; // Adjusted gap between columns
 int currentSong = 0;
 
 void setup() {
-  size(900, 700);
+  size(800, 600);
   minim = new Minim(this);
 
   String[] fileNames = {
