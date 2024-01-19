@@ -4,130 +4,190 @@ Minim minim;
 AudioPlayer[] players = new AudioPlayer[3];
 boolean[] isPlaying = new boolean[3];
 boolean[] isMuted = new boolean[3];
-float buttonWidth = 80;
-float buttonHeight = 40;
-float buttonGap = 20;
-float columnGap = 150; // Adjusted gap between columns
-int currentSong = 0;
+float[] restartButtonX = new float[3];
+int currentSong = 0; // Track the current playing song
 
 void setup() {
-  size(800, 600);
+  size(900, 700);
   minim = new Minim(this);
 
-  String[] fileNames = {
-    "✯call-of-duty-black-ops-zombies-main-menu-theme✯-made-with-Voicemod-technology.mp3",
-    "01-main-theme-overworld.mp3",
-    "main-theme-super-smash-bros-brawl-made-with-Voicemod-technology.mp3"
-  };
+  players[0] = minim.loadFile("01-main-theme-overworld.mp3");
+  players[1] = minim.loadFile("call-of-duty-black-ops-zombies-main-menu-theme-made-with-Voicemod-technology.mp3");
+  players[2] = minim.loadFile("main-theme-super-smash-bros-brawl-made-with-Voicemod-technology.mp3");
 
-  for (int i = 0; i < players.length; i++) {
-    players[i] = minim.loadFile(fileNames[i]);
-    createButton(20 + i * (buttonWidth + buttonGap + columnGap), 20, players[i]);
+  for (int i = 0; i < 3; i++) {
+    restartButtonX[i] = createUI(20, 20 + 80 * i, players[i], i + 1);
   }
 }
 
-void createButton(float x, float y, AudioPlayer player) {
-  fill(0, 255, 0);
+float createUI(float x, float y, AudioPlayer player, int songNumber) {
+  float buttonWidth = 80;
+  float buttonHeight = 40;
+
+  // Play button (Red)
+  fill(255, 0, 0);
   rect(x, y, buttonWidth, buttonHeight);
-  fill(0);
+  fill(255);
   textAlign(CENTER, CENTER);
   textSize(16);
   text("Play", x + buttonWidth / 2, y + buttonHeight / 2);
 
-  fill(255, 0, 0);
-  rect(x, y + buttonHeight + buttonGap, buttonWidth, buttonHeight);
-  fill(0);
-  text("Pause", x + buttonWidth / 2, y + 2 * buttonHeight + buttonGap);
-
-  fill(0, 0, 255);
-  rect(x, y + 2 * (buttonHeight + buttonGap), buttonWidth, buttonHeight);
-  fill(0);
-  text("Restart", x + buttonWidth / 2, y + 3 * buttonHeight + 2 * buttonGap);
-
+  // Pause button (Orange)
+  float pauseButtonX = x + buttonWidth + 20;
   fill(255, 165, 0);
-  rect(x, y + 3 * (buttonHeight + buttonGap), buttonWidth, buttonHeight);
-  fill(0);
-  text("Skip 15s", x + buttonWidth / 2, y + 4 * buttonHeight + 3 * buttonGap);
-
-  fill(150, 75, 0);
-  rect(x, y + 4 * (buttonHeight + buttonGap), buttonWidth + 40, buttonHeight);
-  fill(0);
-  text("Go Back 15s", x + buttonWidth / 2, y + 5 * buttonHeight + 4 * buttonGap);
-
+  rect(pauseButtonX, y, buttonWidth, buttonHeight);
   fill(255);
-  rect(x, y + 5 * (buttonHeight + buttonGap), buttonWidth, buttonHeight);
+  text("Pause", pauseButtonX + buttonWidth / 2, y + buttonHeight / 2);
+
+  // Restart button (Green)
+  float restartButtonX = pauseButtonX + buttonWidth + 20;
+  fill(0, 255, 0);
+  rect(restartButtonX, y, buttonWidth, buttonHeight);
+  fill(255);
+  text("Restart", restartButtonX + buttonWidth / 2, y + buttonHeight / 2);
+
+  // Skip 15 seconds button (Blue)
+  float skipButtonX = restartButtonX + buttonWidth + 20;
+  fill(0, 0, 255);
+  rect(skipButtonX, y, buttonWidth, buttonHeight);
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  text("Skip 15s", skipButtonX + buttonWidth / 2, y + buttonHeight / 2);
+
+  // Go Back 15 seconds button (Brown)
+  float goBackButtonX = skipButtonX + buttonWidth + 20;
+  fill(150, 75, 0);
+  rect(goBackButtonX, y, buttonWidth + 40, buttonHeight); // Adjusted width for the new button
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  text("Go Back 15s", goBackButtonX + (buttonWidth + 40) / 2, y + buttonHeight / 2);
+
+  // Mute button (Black with White text)
+  float muteButtonX = width - buttonWidth - 20;
   fill(0);
-  text("Mute", x + buttonWidth / 2, y + 6 * buttonHeight + 5 * buttonGap);
+  rect(muteButtonX, y, buttonWidth, buttonHeight);
+  fill(255);
+  text("Mute", muteButtonX + buttonWidth / 2, y + buttonHeight / 2);
+
+
+  return restartButtonX;
 }
 
 void draw() {
-  fill(255);
+  // Your drawing code here
+ fill(255);
   textSize(16);
   textAlign(LEFT, BOTTOM);
-  text("Press 'P' to go to the Previous Song", 10, height - 30);
-  text("Press 'N' to go to the Next Song", 10, height - 10);
+  text("Press 'L' to go to the Previous Song", 10, height - 30);
+  text("Press 'W' to go to the Next Song", 10, height - 10);
 }
 
 void mousePressed() {
-  for (int i = 0; i < players.length; i++) {
-    float startX = 20 + i * (buttonWidth + buttonGap + columnGap);
-    float startY = 20;
-    float endX = startX + buttonWidth;
-    float endY = startY + buttonHeight;
+  float playButtonWidth = 80;
+  float playButtonHeight = 40;
+  float pauseButtonWidth = 80;
+  float skipButtonWidth = 80;
+  float goBackButtonWidth = 120; // Adjusted width for the new button
 
-    if (mouseX > startX && mouseX < endX && mouseY > startY && mouseY < endY) {
-      handleButtonClick(i);
+  for (int i = 0; i < 3; i++) {
+    float currentRestartButtonX = restartButtonX[i];
+
+    // Check if the mouse is clicked within the play button
+    if (mouseX > 20 && mouseX < 20 + playButtonWidth && mouseY > 20 + 80 * i && mouseY < 20 + 80 * i + playButtonHeight) {
+      togglePlayPause(players[i], isPlaying[i]);
+      isPlaying[i] = !isPlaying[i];
+    }
+
+    // Check if the mouse is clicked within the pause button
+    if (mouseX > 20 + playButtonWidth + 20 && mouseX < 20 + playButtonWidth + 20 + pauseButtonWidth && mouseY > 20 + 80 * i && mouseY < 20 + 80 * i + playButtonHeight) {
+      players[i].pause();
+      isPlaying[i] = false;
+    }
+
+    // Check if the mouse is clicked within the restart button
+    if (mouseX > currentRestartButtonX && mouseX < currentRestartButtonX + playButtonWidth && mouseY > 20 + 80 * i && mouseY < 20 + 80 * i + playButtonHeight) {
+      players[i].rewind();
+      players[i].skip(15); // Skip 15 seconds into the song
+      isPlaying[i] = false;
+    }
+
+    // Check if the mouse is clicked within the mute button
+    if (mouseX > width - playButtonWidth - 20 && mouseX < width - 20 && mouseY > 20 + 80 * i && mouseY < 20 + 80 * i + playButtonHeight) {
+      toggleMuteUnmute(players[i], isMuted[i]);
+      isMuted[i] = !isMuted[i];
+    }
+
+    // Check if the mouse is clicked within the skip 15 seconds button
+    if (mouseX > currentRestartButtonX + playButtonWidth + 20 && mouseX < currentRestartButtonX + playButtonWidth + 20 + skipButtonWidth && mouseY > 20 + 80 * i && mouseY < 20 + 80 * i + playButtonHeight) {
+      skip15Seconds(players[i], isPlaying[i]);
+    }
+
+    // Check if the mouse is clicked within the go back 15 seconds button
+    if (mouseX > currentRestartButtonX + playButtonWidth + 20 + skipButtonWidth + 20 && mouseX < currentRestartButtonX + playButtonWidth + 20 + skipButtonWidth + 20 + goBackButtonWidth && mouseY > 20 + 80 * i && mouseY < 20 + 80 * i + playButtonHeight) {
+      goBack15Seconds(players[i], isPlaying[i]);
     }
   }
 }
 
-void handleButtonClick(int index) {
-  switch (index) {
-    case 0: togglePlayPause(); break;
-    case 1: players[index].pause(); isPlaying[index] = false; break;
-    case 2: players[index].rewind(); players[index].skip(15); isPlaying[index] = false; break;
-    case 3: skip15Seconds(); break;
-    case 4: goBack15Seconds(); break;
-    case 5: toggleMuteUnmute(); break;
+void togglePlayPause(AudioPlayer player, boolean isPlaying) {
+  if (isPlaying) {
+    player.pause();
+  } else {
+    player.play();
   }
 }
 
-void togglePlayPause() {
-  isPlaying[currentSong] = !isPlaying[currentSong];
-  if (isPlaying[currentSong]) players[currentSong].play();
-  else players[currentSong].pause();
+void toggleMuteUnmute(AudioPlayer player, boolean isMuted) {
+  if (isMuted) {
+    player.unmute();
+  } else {
+    player.mute();
+  }
 }
 
-void toggleMuteUnmute() {
-  isMuted[currentSong] = !isMuted[currentSong];
-  if (isMuted[currentSong]) players[currentSong].mute();
-  else players[currentSong].unmute();
+void skip15Seconds(AudioPlayer player, boolean isPlaying) {
+  if (isPlaying) {
+    player.skip(15);
+  }
 }
 
-void skip15Seconds() {
-  if (isPlaying[currentSong]) players[currentSong].skip(15);
-}
-
-void goBack15Seconds() {
-  if (isPlaying[currentSong]) players[currentSong].skip(-15);
+void goBack15Seconds(AudioPlayer player, boolean isPlaying) {
+  if (isPlaying) {
+    player.skip(-15); // Go back 15 seconds
+  }
 }
 
 void keyPressed() {
-  if (key == 'N' || key == 'n') skipSong();
-  else if (key == 'P' || key == 'p') goBackSong();
+  if (key == 'W' || key == 'w') {
+    skipSong();
+} else if (key == 'L' || key == 'l') {
+    goBackSong();
+  }
 }
 
 void goBackSong() {
+  // Stop the current song
   players[currentSong].close();
+
+  // Decrement the currentSong index
   currentSong = (currentSong - 1 + players.length) % players.length;
+
+  // Load and play the previous song
   players[currentSong].rewind();
   players[currentSong].play();
   isPlaying[currentSong] = true;
 }
 
 void skipSong() {
+  // Stop the current song
   players[currentSong].close();
+
+  // Increment the currentSong index
   currentSong = (currentSong + 1) % players.length;
+
+  // Load and play the next song
   players[currentSong].rewind();
   players[currentSong].play();
   isPlaying[currentSong] = true;
